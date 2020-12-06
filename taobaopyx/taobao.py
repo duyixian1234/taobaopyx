@@ -4,6 +4,7 @@ import json
 import logging
 import time
 from datetime import datetime
+from io import IOBase
 
 import httpx
 
@@ -45,8 +46,9 @@ class APIRequest:
             "timestamp": datetime.now(),
         }
         for key, value in dict(self.values, **args).items():
-            if hasattr(value, "read"):
-                files[key] = value.value
+            if isinstance(value, IOBase):
+                files[key] = value
+                print("here")
             elif value is not None:
                 data[key] = VALUE_TO_STR.get(type(value), default_value_to_str)(value)
         args_str = "".join(f"{key}{data[key]}" for key in sorted(data.keys()))

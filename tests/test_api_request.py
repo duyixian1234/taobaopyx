@@ -1,10 +1,13 @@
-from unittest import mock
-from taobaopyx.taobao import AsyncTaobaoAPIClient, APIRequest, TaobaoAPIError
-import pytest
-from datetime import datetime
-import asyncmock
-import hmac
+import asyncio
 import hashlib
+import hmac
+from datetime import datetime
+from io import BytesIO
+from unittest import mock
+
+import asyncmock
+import pytest
+from taobaopyx.taobao import APIRequest, AsyncTaobaoAPIClient, TaobaoAPIError, make_request
 
 
 @pytest.fixture
@@ -29,7 +32,7 @@ def method():
 
 @pytest.fixture
 def kwargs():
-    yield dict(nick="nick")
+    yield dict(nick="nick", file=BytesIO(b"content"))
 
 
 @pytest.fixture
@@ -50,7 +53,8 @@ def signature(client: AsyncTaobaoAPIClient, method: str, kwargs: dict, now: date
     kwargs["method"] = method
     data = {}
     for key, value in dict(kwargs, **args).items():
-        data[key] = str(value)
+        if not isinstance(value, BytesIO):
+            data[key] = str(value)
     args_str = "".join(f"{key}{data[key]}" for key in sorted(data.keys()))
     print(args_str)
     return hmac.new(client.app_secret.encode(), args_str.encode(), hashlib.md5).hexdigest().upper()
@@ -82,3 +86,15 @@ async def test_request(
     client.http_client.post.return_value = mock.Mock(json=mock.Mock(side_effect=ValueError()), text="XML")
     with pytest.raises(TaobaoAPIError):
         await request.run()
+
+
+@pytest.mark.asyncio
+@mock.patch("taobaopyx.taobao.APIRequest")
+async def test_make_request(mock_request_class, client: AsyncTaobaoAPIClient):
+    request = mock.Mock()
+    request.run.return_value = asyncio.Future()
+    request.run.return_value.set_result({"response": {}})
+    mock_request_class.return_value = request
+    await make_request(client, "taobao.mixnick.get", {"nick": "nick"})
+    mock_request_class.assert_called_once_with(client.gw_url, client, {"nick": "nick", "method": "taobao.mixnick.get"})
+    request.run.assert_called_once_with()
