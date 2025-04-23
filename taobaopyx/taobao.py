@@ -23,7 +23,7 @@ def default_value_to_str(val):
 VALUE_TO_STR = {
     datetime: lambda v: v.strftime("%Y-%m-%d %H:%M:%S"),
     str: lambda v: v,
-    float: lambda v: "%.2f" % v,
+    float: lambda v: f"{v:.2f}",
     bool: lambda v: str(v).lower(),
 }
 
@@ -110,7 +110,7 @@ class TaobaoAPIError(Exception):
 
     def __init__(self, request, code="", msg="", sub_code="", sub_msg="", request_id="", **kwargs):
         """TaoBao SDK Error, Raised From TaoBao"""
-        # pylint:disable=too-many-arguments
+        # pylint:disable=too-many-arguments,too-many-positional-arguments
         self.request = request
         self.code = code
         self.msg = msg
@@ -135,7 +135,7 @@ class AsyncTaobaoAPIClient:
         app_key: str,
         app_secret: str,
         domain: str = "https://eco.taobao.com",
-        http_client: httpx.AsyncClient = None,
+        http_client: httpx.AsyncClient | None = None,
         **kwargs,
     ):
         self.app_key = app_key
