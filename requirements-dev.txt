@@ -4,6 +4,8 @@ anyio==4.9.0
     # via httpx
 astroid==3.3.9
     # via pylint
+asyncmock==0.4.2
+    # via taobaopyx (pyproject.toml:dev)
 certifi==2025.1.31
     # via
     #   httpcore
@@ -32,6 +34,8 @@ isort==6.0.1
     #   pylint
 mccabe==0.7.0
     # via pylint
+mock==5.2.0
+    # via asyncmock
 mypy==1.15.0
     # via taobaopyx (pyproject.toml:dev)
 mypy-extensions==1.1.0
@@ -45,6 +49,10 @@ pluggy==1.5.0
 pylint==3.3.6
     # via taobaopyx (pyproject.toml:dev)
 pytest==8.3.5
+    # via
+    #   taobaopyx (pyproject.toml:dev)
+    #   pytest-asyncio
+pytest-asyncio==0.26.0
     # via taobaopyx (pyproject.toml:dev)
 sniffio==1.3.1
     # via anyio
